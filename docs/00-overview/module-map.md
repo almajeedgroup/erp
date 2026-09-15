@@ -31,14 +31,14 @@ from. Nothing points back up, which is what keeps the graph a graph.
 | Module | Owns | Key invariant |
 | --- | --- | --- |
 | [Organization](../02-architecture/multi-tenancy.md) | Tenants, users, memberships, roles, the audit log | An organization always has at least one owner |
-| [Clients](08-modules/clients.md) | Client accounts and their contacts | Cannot be deleted while active projects or unpaid invoices reference it |
-| [Projects](08-modules/projects.md) | Projects, assignments, time entries | Invoiced time is immutable |
-| [Employees](08-modules/employees.md) | People, employment, compensation | Sensitive fields are stripped, not hidden |
-| [Finance](08-modules/finance.md) | Invoices, lines, payments, expenses | A draft is editable; an issued invoice is not |
-| [Documents](08-modules/documents.md) | Files and their metadata | The stored content type comes from the bytes, not the request |
-| [Tasks](08-modules/tasks.md) | Work items and comments | `completedAt` is a consequence of status, never an input |
-| [Analytics](08-modules/analytics.md) | Derived metrics only | Owns no tables; every figure defined exactly once |
-| [AI agent](08-modules/ai-agent.md) | Conversations, messages, retrieval chunks | Tools run as the caller, with the caller's permissions |
+| [Clients](../08-modules/clients.md) | Client accounts and their contacts | Cannot be deleted while active projects or unpaid invoices reference it |
+| [Projects](../08-modules/projects.md) | Projects, assignments, time entries | Invoiced time is immutable |
+| [Employees](../08-modules/employees.md) | People, employment, compensation | Sensitive fields are stripped, not hidden |
+| [Finance](../08-modules/finance.md) | Invoices, lines, payments, expenses | A draft is editable; an issued invoice is not |
+| [Documents](../08-modules/documents.md) | Files and their metadata | The stored content type comes from the bytes, not the request |
+| [Tasks](../08-modules/tasks.md) | Work items and comments | `completedAt` is a consequence of status, never an input |
+| [Analytics](../08-modules/analytics.md) | Derived metrics only | Owns no tables; every figure defined exactly once |
+| [AI agent](../08-modules/ai-agent.md) | Conversations, messages, retrieval chunks | Tools run as the caller, with the caller's permissions |
 
 ## Why the arrows point this way
 
@@ -57,7 +57,7 @@ not stored, so it cannot go stale.
 
 **Analytics owns no tables.** It is pure derivation over the others. The moment
 it owns a table, there are two sources of truth for revenue and they will
-disagree — see [analytics](08-modules/analytics.md) for the definitions it is
+disagree — see [analytics](../08-modules/analytics.md) for the definitions it is
 the sole owner of.
 
 **The AI agent sits at the bottom.** It reads from everything and writes to
