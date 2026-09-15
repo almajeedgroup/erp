@@ -11,7 +11,7 @@
 # root-in-container, and there is no reason for a Node process to have it.
 # ---------------------------------------------------------------------------
 
-FROM node:22-bookworm-slim AS base
+FROM node:26-bookworm-slim AS base
 ENV CI=true
 WORKDIR /app
 
@@ -46,7 +46,7 @@ RUN npm ci --omit=dev --workspaces --include-workspace-root \
  && npm cache clean --force
 
 # --- runtime ---------------------------------------------------------------
-FROM node:22-bookworm-slim AS runtime
+FROM node:26-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     API_HOST=0.0.0.0 \
     API_PORT=4000 \
