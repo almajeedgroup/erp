@@ -30,7 +30,7 @@
     "test:coverage": "vitest run --coverage",
     "db:generate": "npm run generate -w @almajeed/db",
     "db:migrate": "npm run migrate -w @almajeed/db",
-    "db:seed": "npm run seed -w @almajeed/db",
+    "db:seed": "npm run seed -w @almajeed/api",
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test",
     "clean": "rm -rf node_modules */*/node_modules */*/dist apps/web/.next coverage *.tsbuildinfo"
   },

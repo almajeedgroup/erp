@@ -11,13 +11,7 @@ import {
   tagsSchema,
 } from './common.js';
 
-export const PROJECT_STATUSES = [
-  'draft',
-  'active',
-  'on_hold',
-  'completed',
-  'cancelled',
-] as const;
+export const PROJECT_STATUSES = ['draft', 'active', 'on_hold', 'completed', 'cancelled'] as const;
 export const projectStatusSchema = z.enum(PROJECT_STATUSES);
 export type ProjectStatus = (typeof PROJECT_STATUSES)[number];
 

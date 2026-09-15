@@ -11,7 +11,14 @@ import {
   tagsSchema,
 } from './common.js';
 
-export const TASK_STATUSES = ['todo', 'in_progress', 'blocked', 'in_review', 'done', 'cancelled'] as const;
+export const TASK_STATUSES = [
+  'todo',
+  'in_progress',
+  'blocked',
+  'in_review',
+  'done',
+  'cancelled',
+] as const;
 export const taskStatusSchema = z.enum(TASK_STATUSES);
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 

@@ -138,11 +138,9 @@ export const notFound = (resource: string, id?: string) =>
 export const conflict = (message: string, details?: Record<string, unknown>) =>
   new AppError('conflict', message, details ? { details } : {});
 
-export const preconditionFailed = (message: string) =>
-  new AppError('precondition_failed', message);
+export const preconditionFailed = (message: string) => new AppError('precondition_failed', message);
 
-export const rateLimited = (message = 'Too many requests') =>
-  new AppError('rate_limited', message);
+export const rateLimited = (message = 'Too many requests') => new AppError('rate_limited', message);
 
 export const payloadTooLarge = (message = 'Payload exceeds the permitted size') =>
   new AppError('payload_too_large', message);

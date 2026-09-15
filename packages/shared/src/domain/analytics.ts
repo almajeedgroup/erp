@@ -114,12 +114,8 @@ export const cashFlowForecastSchema = z.object({
 });
 
 export const pipelineSchema = z.object({
-  byStatus: z.array(
-    z.object({ status: z.string(), clients: z.number().int().nonnegative() }),
-  ),
-  byChannel: z.array(
-    z.object({ channel: z.string(), clients: z.number().int().nonnegative() }),
-  ),
+  byStatus: z.array(z.object({ status: z.string(), clients: z.number().int().nonnegative() })),
+  byChannel: z.array(z.object({ channel: z.string(), clients: z.number().int().nonnegative() })),
 });
 
 export type Overview = z.infer<typeof overviewSchema>;

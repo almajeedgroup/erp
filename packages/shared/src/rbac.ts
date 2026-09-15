@@ -268,12 +268,18 @@ export function can(role: Role | string, permission: Permission | string): boole
 }
 
 /** True only when the role holds every listed permission. */
-export function canAll(role: Role | string, permissions: readonly (Permission | string)[]): boolean {
+export function canAll(
+  role: Role | string,
+  permissions: readonly (Permission | string)[],
+): boolean {
   return permissions.every((p) => can(role, p));
 }
 
 /** True when the role holds at least one of the listed permissions. */
-export function canAny(role: Role | string, permissions: readonly (Permission | string)[]): boolean {
+export function canAny(
+  role: Role | string,
+  permissions: readonly (Permission | string)[],
+): boolean {
   return permissions.some((p) => can(role, p));
 }
 

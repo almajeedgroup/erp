@@ -80,7 +80,10 @@ export const safeFilenameSchema = z
   .max(255)
   .refine((v) => !v.includes('/') && !v.includes('\\'), 'must not contain path separators')
   .refine((v) => !v.includes('\0'), 'must not contain null bytes')
-  .refine((v) => v !== '.' && v !== '..' && !v.startsWith('.'), 'must not be a dotfile or traversal');
+  .refine(
+    (v) => v !== '.' && v !== '..' && !v.startsWith('.'),
+    'must not be a dotfile or traversal',
+  );
 
 export const createDocumentMetadataSchema = z.strictObject({
   title: shortText.optional(),

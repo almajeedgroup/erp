@@ -4,7 +4,11 @@ import { createClientSchema } from './clients.js';
 import { createProjectSchema } from './projects.js';
 import { createEmployeeSchema } from './employees.js';
 import { canTransitionInvoice, createInvoiceSchema } from './finance.js';
-import { createDocumentMetadataSchema, isAllowedMimeType, safeFilenameSchema } from './documents.js';
+import {
+  createDocumentMetadataSchema,
+  isAllowedMimeType,
+  safeFilenameSchema,
+} from './documents.js';
 import { createTaskSchema } from './tasks.js';
 import { chatRequestSchema } from './ai.js';
 import { emailSchema, moneySchema, paginationQuerySchema } from './common.js';
@@ -136,7 +140,11 @@ describe('validation schemas', () => {
           issueDate: '2026-03-10',
           dueDate: '2026-03-01',
           lines: [
-            { description: 'Consulting', quantity: 1, unitPrice: { amount: '100', currency: 'SAR' } },
+            {
+              description: 'Consulting',
+              quantity: 1,
+              unitPrice: { amount: '100', currency: 'SAR' },
+            },
           ],
         }).success,
       ).toBe(false);

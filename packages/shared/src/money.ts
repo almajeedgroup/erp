@@ -94,7 +94,9 @@ export function fromDecimal(value: string | number, currency: CurrencyCode): Mon
 export function toDecimal(m: Money): string {
   const exp = exponentOf(m.currency);
   const sign = m.amount < 0 ? '-' : '';
-  const digits = Math.abs(m.amount).toString().padStart(exp + 1, '0');
+  const digits = Math.abs(m.amount)
+    .toString()
+    .padStart(exp + 1, '0');
   if (exp === 0) return `${sign}${digits}`;
   return `${sign}${digits.slice(0, -exp)}.${digits.slice(-exp)}`;
 }

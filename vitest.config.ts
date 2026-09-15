@@ -6,6 +6,8 @@ const r = (p: string) => fileURLToPath(new URL(p, import.meta.url));
 export default defineConfig({
   resolve: {
     alias: {
+      // Most specific first: aliases are matched in order.
+      '@almajeed/db/testing': r('./packages/db/src/testing.ts'),
       '@almajeed/shared': r('./packages/shared/src/index.ts'),
       '@almajeed/db': r('./packages/db/src/index.ts'),
     },

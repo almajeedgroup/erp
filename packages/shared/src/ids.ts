@@ -72,7 +72,9 @@ export function isId<K extends IdPrefixName>(kind: K, value: unknown): value is 
 /** Narrow an unknown value to an `Id<K>`, throwing a plain `TypeError` if it is not one. */
 export function assertId<K extends IdPrefixName>(kind: K, value: unknown): Id<K> {
   if (!isId(kind, value)) {
-    throw new TypeError(`Expected a ${kind} id (prefix "${ID_PREFIXES[kind]}_"), got: ${String(value)}`);
+    throw new TypeError(
+      `Expected a ${kind} id (prefix "${ID_PREFIXES[kind]}_"), got: ${String(value)}`,
+    );
   }
   return value;
 }

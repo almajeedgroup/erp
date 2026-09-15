@@ -94,7 +94,8 @@ export function periodRange(from: IsoDate, to: IsoDate, granularity: Granularity
       seen.add(key);
       keys.push(key);
     }
-    cursor = granularity === 'day' ? addDays(cursor, 1) : addDays(cursor, granularity === 'week' ? 7 : 1);
+    cursor =
+      granularity === 'day' ? addDays(cursor, 1) : addDays(cursor, granularity === 'week' ? 7 : 1);
     guard += 1;
   }
   return keys;

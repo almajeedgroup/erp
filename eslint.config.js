@@ -32,7 +32,8 @@ export default tseslint.config(
     },
   },
   {
-    files: ['**/*.test.ts', '**/*.test.tsx', 'scripts/**/*.ts', 'packages/db/src/seed.ts'],
+    // CLI entry points talk to an operator through stdout; that is their job.
+    files: ['**/*.test.ts', '**/*.test.tsx', 'scripts/**/*.ts', '**/src/scripts/*.ts'],
     rules: { 'no-console': 'off' },
   },
   prettier,

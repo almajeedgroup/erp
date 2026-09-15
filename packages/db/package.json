@@ -17,13 +17,15 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
-  "files": ["dist", "drizzle"],
+  "files": [
+    "dist",
+    "drizzle"
+  ],
   "scripts": {
     "build": "tsc -b",
     "clean": "rm -rf dist *.tsbuildinfo",
     "generate": "drizzle-kit generate",
     "migrate": "tsx src/scripts/migrate.ts",
-    "seed": "tsx src/scripts/seed.ts",
     "studio": "drizzle-kit studio"
   },
   "dependencies": {

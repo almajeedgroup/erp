@@ -48,11 +48,7 @@ export function canTransitionInvoice(from: InvoiceStatus, to: InvoiceStatus): bo
 
 export const invoiceLineSchema = z.strictObject({
   description: shortText,
-  quantity: z
-    .number()
-    .min(0.001)
-    .max(1_000_000)
-    .describe('supports fractional hours, e.g. 7.5'),
+  quantity: z.number().min(0.001).max(1_000_000).describe('supports fractional hours, e.g. 7.5'),
   unitPrice: moneySchema,
   /** Percentage, e.g. 15 for 15% VAT. Applied per line, not per invoice. */
   taxRate: z.number().min(0).max(100).default(0),
