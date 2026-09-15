@@ -1,0 +1,210 @@
+name: CI
+
+# Every push to a branch and every pull request. The same commands a developer
+# runs locally (`npm run verify`), split into separate jobs so a failure names
+# itself in the check list rather than hiding inside one long log.
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+# A new push supersedes the run in flight for the same ref. No point burning
+# minutes on a commit nobody is waiting for any more — except on the default
+# branch, where every commit's result is worth keeping.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  verify:
+    name: Lint, typecheck and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Formatting
+        run: npm run format:check
+
+      - name: Lint
+        run: npm run lint
+
+      # `tsc -b` also emits the shared and db packages, which the test suite and
+      # the web build both need, so this step doubles as the package build.
+      - name: Typecheck
+        run: npm run typecheck
+
+      # No database service is declared on purpose: the suite runs against
+      # PGlite (Postgres compiled to WebAssembly, in-process), so there is no
+      # container to wait for and no port to race on. See ADR-0004.
+      - name: Test
+        run: npm run test -- --coverage
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: coverage/
+          retention-days: 7
+          if-no-files-found: ignore
+
+  build-web:
+    name: Build web
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # `next build` type-checks the app as part of the build, which is why the
+      # web app is not in the root tsconfig project references.
+      - name: Build
+        run: npm run build:packages && npm run build -w @almajeed/web
+
+  migrations:
+    name: Migrations apply to real Postgres
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # The unit and integration suites use PGlite, which is genuinely Postgres
+    # but not the exact build production runs. This job closes that gap: the
+    # committed migrations are applied to the real server, through the real
+    # node-postgres driver, on the image the deployment uses.
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_USER: erp
+          POSTGRES_PASSWORD: erp
+          POSTGRES_DB: erp
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U erp"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build:packages
+
+      - name: Apply migrations
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: postgresql://erp:erp@localhost:5432/erp
+
+      # Applying twice proves the migrations are idempotent — a deploy that
+      # restarts mid-migration, or two replicas starting together, must not
+      # break the database.
+      - name: Apply again (idempotence)
+        run: npm run db:migrate
+        env:
+          DATABASE_URL: postgresql://erp:erp@localhost:5432/erp
+
+      - name: Seed demo data
+        run: npm run db:seed
+        env:
+          DATABASE_URL: postgresql://erp:erp@localhost:5432/erp
+          JWT_SECRET: ci-only-jwt-secret-at-least-32-characters
+          PASSWORD_PEPPER: ci-only-password-pepper-32-characters!
+          AI_PROVIDER: mock
+          STORAGE_DRIVER: local
+          STORAGE_LOCAL_PATH: ./var/storage
+
+      # Drift check. `drizzle-kit generate` writes a migration only when the
+      # schema has changed, so a new or modified file here means someone edited
+      # the Drizzle schema without generating the migration to match — which
+      # would otherwise surface as a failed deploy.
+      - name: No schema changes without a migration
+        working-directory: packages/db
+        run: |
+          npx drizzle-kit generate
+          if [ -n "$(git status --porcelain drizzle)" ]; then
+            echo "::error::The schema has changed but no migration was committed."
+            echo "Run 'npm run db:generate' and commit the result."
+            git status --porcelain drizzle
+            exit 1
+          fi
+
+  docker:
+    name: Build images
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/api.Dockerfile
+          push: false
+          tags: almajeed/erp-api:ci
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,scope=api,mode=max
+
+      - name: Build web image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: infra/docker/web.Dockerfile
+          push: false
+          tags: almajeed/erp-web:ci
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,scope=web,mode=max
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      # Fails on high and critical only. Blocking every build on a moderate
+      # advisory in a dev-only transitive dependency trains people to ignore the
+      # check, which is worse than not having it.
+      - name: Audit
+        run: npm audit --audit-level=high

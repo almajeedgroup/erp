@@ -1,0 +1,35 @@
+name: CodeQL
+
+# Static analysis for the JavaScript/TypeScript tree. Weekly as well as on
+# pushes, because a new CodeQL rule can find a vulnerability in code that has
+# not changed since the last scan.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 3 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+          # The extended suite adds quality rules on top of the security ones.
+          queries: security-and-quality
+
+      - uses: github/codeql-action/analyze@v3
+        with:
+          category: '/language:javascript-typescript'

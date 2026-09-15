@@ -7,20 +7,12 @@
     "declaration": false,
     "declarationMap": false,
     "incremental": false,
-    "types": [
-      "node"
-    ],
+    "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@almajeed/shared": [
-        "./packages/shared/src/index.ts"
-      ],
-      "@almajeed/db": [
-        "./packages/db/src/index.ts"
-      ],
-      "@almajeed/db/testing": [
-        "./packages/db/src/testing.ts"
-      ]
+      "@almajeed/shared": ["./packages/shared/src/index.ts"],
+      "@almajeed/db": ["./packages/db/src/index.ts"],
+      "@almajeed/db/testing": ["./packages/db/src/testing.ts"]
     }
   },
   "include": [

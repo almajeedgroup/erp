@@ -116,7 +116,6 @@ process.on('uncaughtException', (error) => {
   process.exit(1);
 });
 
-
 /** In-process Postgres for demo mode. Never reached in production. */
 async function createDemoDatabase(): Promise<{ db: Database; close: () => Promise<void> }> {
   const { createTestDatabase } = await import('@almajeed/db/testing');

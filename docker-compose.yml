@@ -1,0 +1,95 @@
+# Local development stack.
+#
+# `make up` starts Postgres alone, which is all `npm run dev` needs.
+# `docker compose --profile full up --build` additionally builds and runs the
+# API and web containers, which is how you check that a change behaves the same
+# inside an image as it does on your machine.
+
+name: almajeed-erp
+
+services:
+  db:
+    # pgvector is not required by the current schema — ADR-0005 explains why
+    # embeddings are JSONB for now — but the image costs nothing extra and means
+    # the migration path will not need a new image later.
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_USER: erp
+      POSTGRES_PASSWORD: erp
+      POSTGRES_DB: erp
+      # Deterministic collation, so ORDER BY does not differ between a
+      # developer's machine and production.
+      POSTGRES_INITDB_ARGS: '--locale-provider=icu --icu-locale=en-US --encoding=UTF8'
+    ports:
+      - '5432:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U erp -d erp']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: infra/docker/api.Dockerfile
+    environment:
+      NODE_ENV: production
+      API_HOST: 0.0.0.0
+      API_PORT: 4000
+      WEB_ORIGIN: http://localhost:3000
+      DATABASE_URL: postgresql://erp:erp@db:5432/erp
+      DATABASE_SSL: 'false'
+      RUN_MIGRATIONS_ON_BOOT: 'true'
+      # Local-only values. A real deployment refuses to start with the
+      # .env.example placeholders — see the superRefine in
+      # apps/api/src/config/env.ts.
+      JWT_SECRET: local-compose-jwt-secret-32-characters
+      PASSWORD_PEPPER: local-compose-password-pepper-32-chars
+      AI_PROVIDER: mock
+      STORAGE_DRIVER: local
+      STORAGE_LOCAL_PATH: /var/lib/erp/storage
+    ports:
+      - '4000:4000'
+    volumes:
+      - storage:/var/lib/erp/storage
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://127.0.0.1:4000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 20s
+    restart: unless-stopped
+
+  web:
+    profiles: ['full']
+    build:
+      context: .
+      dockerfile: infra/docker/web.Dockerfile
+    environment:
+      NODE_ENV: production
+      # Container to container, so this is the service name rather than
+      # localhost — a classic first-run stumble.
+      API_BASE_URL: http://api:4000
+      NEXT_PUBLIC_APP_NAME: Al-Majeed ERP
+    ports:
+      - '3000:3000'
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  storage:

@@ -4,18 +4,10 @@
     "rootDir": "./src",
     "outDir": "./dist",
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "types": [
-      "node"
-    ]
+    "types": ["node"]
   },
-  "include": [
-    "src/**/*.ts"
-  ],
-  "exclude": [
-    "src/**/*.test.ts",
-    "src/test/**",
-    "dist"
-  ],
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts", "src/test/**", "dist"],
   "references": [
     {
       "path": "../../packages/shared"

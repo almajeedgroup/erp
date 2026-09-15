@@ -1,0 +1,12 @@
+# Default owner for everything.
+*                       @almajeedgroup/engineering
+
+# The security-sensitive surface gets a second pair of eyes by default.
+/packages/shared/src/rbac.ts        @almajeedgroup/engineering
+/packages/db/src/tenancy.ts         @almajeedgroup/engineering
+/apps/api/src/plugins/              @almajeedgroup/engineering
+/apps/api/src/lib/password.ts       @almajeedgroup/engineering
+/apps/api/src/lib/tokens.ts         @almajeedgroup/engineering
+/apps/api/src/modules/auth/         @almajeedgroup/engineering
+/infra/                             @almajeedgroup/engineering
+/.github/workflows/                 @almajeedgroup/engineering
