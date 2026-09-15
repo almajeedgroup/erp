@@ -4,6 +4,7 @@ import {
   id,
   isoDate,
   longText,
+  mediumText,
   metadataSchema,
   moneySchema,
   paginationQuerySchema,
@@ -171,5 +172,100 @@ export const approveExpenseSchema = z.strictObject({
 
 export type InvoiceLineInput = z.infer<typeof invoiceLineSchema>;
 export type CreateInvoiceInput = z.infer<typeof createInvoiceSchema>;
+export type UpdateInvoiceInput = z.infer<typeof updateInvoiceSchema>;
 export type RecordPaymentInput = z.infer<typeof recordPaymentSchema>;
 export type CreateExpenseInput = z.infer<typeof createExpenseSchema>;
+
+/* ---------------------------------------------------------------- output -- */
+
+export const invoiceLineOutSchema = z.object({
+  id: id('invoiceLine'),
+  position: z.number().int(),
+  description: z.string(),
+  quantity: z.number(),
+  unitPrice: moneySchema,
+  taxRate: z.number(),
+  discountRate: z.number(),
+  projectId: z.string().nullable(),
+  subtotal: moneySchema,
+  discount: moneySchema,
+  tax: moneySchema,
+  total: moneySchema,
+});
+
+export const paymentSchema = z.object({
+  id: id('payment'),
+  invoiceId: id('invoice'),
+  amount: moneySchema,
+  paidAt: z.string(),
+  method: paymentMethodSchema,
+  reference: z.string().nullable(),
+  notes: z.string().nullable(),
+  createdAt: z.string(),
+});
+
+export const invoiceSchema = z.object({
+  id: id('invoice'),
+  number: z.string(),
+  status: invoiceStatusSchema,
+  /** Derived at read time from `dueDate` and the balance — never stored. */
+  overdue: z.boolean(),
+  daysOverdue: z.number().int(),
+  clientId: id('client'),
+  clientName: z.string().nullable(),
+  projectId: z.string().nullable(),
+  currency: currencySchema,
+  issueDate: z.string().nullable(),
+  dueDate: z.string().nullable(),
+  purchaseOrder: z.string().nullable(),
+  subtotal: moneySchema,
+  discount: moneySchema,
+  tax: moneySchema,
+  total: moneySchema,
+  paid: moneySchema,
+  balanceDue: moneySchema,
+  notes: z.string().nullable(),
+  terms: z.string().nullable(),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+/** The full document: header plus its lines and payments. */
+export const invoiceDetailSchema = invoiceSchema.extend({
+  lines: z.array(invoiceLineOutSchema),
+  payments: z.array(paymentSchema),
+});
+
+export const expenseSchema = z.object({
+  id: id('expense'),
+  description: z.string(),
+  category: expenseCategorySchema,
+  status: expenseStatusSchema,
+  amount: moneySchema,
+  taxAmount: moneySchema.nullable(),
+  incurredAt: z.string(),
+  projectId: z.string().nullable(),
+  employeeId: z.string().nullable(),
+  vendor: z.string().nullable(),
+  documentId: z.string().nullable(),
+  billable: z.boolean(),
+  approvedAt: z.string().nullable(),
+  rejectionReason: z.string().nullable(),
+  notes: z.string().nullable(),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const voidInvoiceSchema = z.strictObject({
+  reason: mediumText,
+});
+
+export type Invoice = z.infer<typeof invoiceSchema>;
+export type InvoiceDetail = z.infer<typeof invoiceDetailSchema>;
+export type InvoiceLineOut = z.infer<typeof invoiceLineOutSchema>;
+export type Payment = z.infer<typeof paymentSchema>;
+export type Expense = z.infer<typeof expenseSchema>;

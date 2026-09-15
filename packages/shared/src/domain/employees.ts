@@ -105,3 +105,46 @@ export const listEmployeesQuerySchema = paginationQuerySchema.extend({
 
 export type CreateEmployeeInput = z.infer<typeof createEmployeeSchema>;
 export type UpdateEmployeeInput = z.infer<typeof updateEmployeeSchema>;
+
+/* ---------------------------------------------------------------- output -- */
+
+/**
+ * The employee as the API returns it.
+ *
+ * The three sensitive fields are `.nullable()` because they are **stripped**
+ * for callers without `employee:read_sensitive` — the same endpoint returns a
+ * narrower record rather than a different status code, so a UI can render what
+ * the reader is entitled to see without branching on role.
+ */
+export const employeeSchema = z.object({
+  id: id('employee'),
+  employeeNumber: z.string().nullable(),
+  firstName: z.string(),
+  lastName: z.string(),
+  fullName: z.string(),
+  userId: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  jobTitle: z.string().nullable(),
+  department: z.string().nullable(),
+  managerId: z.string().nullable(),
+  employmentType: employmentTypeSchema,
+  status: employeeStatusSchema,
+  hiredAt: z.string().nullable(),
+  terminatedAt: z.string().nullable(),
+  weeklyHours: z.number().int(),
+  billableRate: moneySchema.nullable(),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+
+  // Present only with `employee:read_sensitive`.
+  compensation: moneySchema.nullable(),
+  payPeriod: payPeriodSchema.nullable(),
+  costRate: moneySchema.nullable(),
+  nationalId: z.string().nullable(),
+  bankAccount: z.string().nullable(),
+});
+
+export type Employee = z.infer<typeof employeeSchema>;

@@ -2,6 +2,9 @@ import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
 import { authRoutes } from './modules/auth/routes.js';
 import { clientRoutes } from './modules/clients/routes.js';
 import { organizationRoutes } from './modules/organizations/routes.js';
+import { employeeRoutes } from './modules/employees/routes.js';
+import { expenseRoutes, invoiceRoutes } from './modules/finance/routes.js';
+import { projectRoutes, timeEntryRoutes } from './modules/projects/routes.js';
 
 /**
  * The route table.
@@ -14,4 +17,9 @@ export const registerRoutes: FastifyPluginAsyncZod = async (app) => {
   await app.register(authRoutes, { prefix: '/auth' });
   await app.register(organizationRoutes, { prefix: '/organization' });
   await app.register(clientRoutes, { prefix: '/clients' });
+  await app.register(projectRoutes, { prefix: '/projects' });
+  await app.register(timeEntryRoutes, { prefix: '/time-entries' });
+  await app.register(employeeRoutes, { prefix: '/employees' });
+  await app.register(invoiceRoutes, { prefix: '/invoices' });
+  await app.register(expenseRoutes, { prefix: '/expenses' });
 };

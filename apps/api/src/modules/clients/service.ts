@@ -155,10 +155,7 @@ export async function getClient(ctx: RequestContext, id: string): Promise<Client
   return toClient(await getClientRow(ctx, id));
 }
 
-export async function createClient(
-  ctx: RequestContext,
-  input: CreateClientInput,
-): Promise<Client> {
+export async function createClient(ctx: RequestContext, input: CreateClientInput): Promise<Client> {
   await assertActiveMember(ctx, input.ownerId);
 
   const id = newId('client');
@@ -234,7 +231,10 @@ export async function updateClient(
   assign('metadata');
 
   await ctx.db.transaction(async (tx) => {
-    await tx.update(clients).set(patch).where(scopeById(clients, ctx.auth.organizationId, id));
+    await tx
+      .update(clients)
+      .set(patch)
+      .where(scopeById(clients, ctx.auth.organizationId, id));
     const changes = diffSnapshot(before as unknown as Record<string, unknown>, patch);
     await writeAudit(tx, {
       organizationId: ctx.auth.organizationId,
@@ -435,10 +435,7 @@ export async function deleteContact(
     .update(contacts)
     .set({ deletedAt: ctx.now, updatedAt: ctx.now })
     .where(
-      and(
-        scopeById(contacts, ctx.auth.organizationId, contactId),
-        eq(contacts.clientId, clientId),
-      ),
+      and(scopeById(contacts, ctx.auth.organizationId, contactId), eq(contacts.clientId, clientId)),
     )
     .returning({ id: contacts.id });
 

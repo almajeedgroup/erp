@@ -122,3 +122,60 @@ export const listTimeEntriesQuerySchema = paginationQuerySchema.extend({
 export type CreateProjectInput = z.infer<typeof createProjectSchema>;
 export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 export type CreateTimeEntryInput = z.infer<typeof createTimeEntrySchema>;
+
+/* ---------------------------------------------------------------- output -- */
+
+export const projectSchema = z.object({
+  id: id('project'),
+  name: z.string(),
+  code: z.string().nullable(),
+  clientId: z.string().nullable(),
+  clientName: z.string().nullable(),
+  status: projectStatusSchema,
+  billingType: billingTypeSchema,
+  currency: z.string(),
+  budget: moneySchema.nullable(),
+  hourlyRate: moneySchema.nullable(),
+  startDate: z.string().nullable(),
+  endDate: z.string().nullable(),
+  managerId: z.string().nullable(),
+  health: healthStatusSchema,
+  description: z.string().nullable(),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const projectMemberSchema = z.object({
+  id: id('projectMember'),
+  projectId: id('project'),
+  userId: id('user'),
+  userName: z.string().nullable(),
+  role: z.string(),
+  allocationPercent: z.number().int(),
+  hourlyRate: moneySchema.nullable(),
+  createdAt: z.string(),
+});
+
+export const timeEntrySchema = z.object({
+  id: id('timeEntry'),
+  projectId: id('project'),
+  projectName: z.string().nullable(),
+  taskId: z.string().nullable(),
+  employeeId: z.string().nullable(),
+  userId: z.string().nullable(),
+  date: z.string(),
+  minutes: z.number().int(),
+  /** `minutes / 60`, rounded to two places. Convenience for display only. */
+  hours: z.number(),
+  billable: z.boolean(),
+  approvedAt: z.string().nullable(),
+  invoicedInvoiceId: z.string().nullable(),
+  notes: z.string().nullable(),
+  createdAt: z.string(),
+});
+
+export type Project = z.infer<typeof projectSchema>;
+export type ProjectMember = z.infer<typeof projectMemberSchema>;
+export type TimeEntry = z.infer<typeof timeEntrySchema>;

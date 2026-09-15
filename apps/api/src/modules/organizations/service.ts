@@ -78,7 +78,14 @@ export async function updateOrganization(
   const before = await getOrganization(ctx);
 
   const patch: Record<string, unknown> = { updatedAt: ctx.now };
-  for (const key of ['name', 'baseCurrency', 'country', 'timezone', 'vatNumber', 'defaultTaxRate'] as const) {
+  for (const key of [
+    'name',
+    'baseCurrency',
+    'country',
+    'timezone',
+    'vatNumber',
+    'defaultTaxRate',
+  ] as const) {
     if (input[key] !== undefined) patch[key] = input[key];
   }
 

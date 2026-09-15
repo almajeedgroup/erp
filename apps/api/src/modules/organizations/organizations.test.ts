@@ -34,7 +34,10 @@ describe('organization administration', () => {
     });
 
     it('lets an owner update settings', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'PATCH',
         url: '/api/v1/organization',
         payload: { baseCurrency: 'AED', defaultTaxRate: 5, country: 'ae' },
@@ -47,7 +50,10 @@ describe('organization administration', () => {
 
     it('denies a manager the settings update', async () => {
       const manager = await addMember(ctx, owner, 'manager');
-      const response = await authed(ctx, manager)({
+      const response = await authed(
+        ctx,
+        manager,
+      )({
         method: 'PATCH',
         url: '/api/v1/organization',
         payload: { name: 'Renamed' },
@@ -58,7 +64,10 @@ describe('organization administration', () => {
 
   describe('membership', () => {
     it('adds a member with the requested role', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'POST',
         url: '/api/v1/organization/members',
         payload: {
@@ -80,7 +89,10 @@ describe('organization administration', () => {
         password: 'correct horse battery staple',
       };
       await authed(ctx, owner)({ method: 'POST', url: '/api/v1/organization/members', payload });
-      const second = await authed(ctx, owner)({
+      const second = await authed(
+        ctx,
+        owner,
+      )({
         method: 'POST',
         url: '/api/v1/organization/members',
         payload,
@@ -90,7 +102,10 @@ describe('organization administration', () => {
 
     it('lists members with their roles', async () => {
       await addMember(ctx, owner, 'finance');
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/organization/members',
       });
@@ -103,7 +118,10 @@ describe('organization administration', () => {
   describe('privilege escalation', () => {
     it('stops an admin from creating an owner', async () => {
       const admin = await addMember(ctx, owner, 'admin');
-      const response = await authed(ctx, admin)({
+      const response = await authed(
+        ctx,
+        admin,
+      )({
         method: 'POST',
         url: '/api/v1/organization/members',
         payload: {
@@ -120,7 +138,10 @@ describe('organization administration', () => {
       const admin = await addMember(ctx, owner, 'admin');
       const member = await addMember(ctx, owner, 'member');
 
-      const response = await authed(ctx, admin)({
+      const response = await authed(
+        ctx,
+        admin,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${member.userId}/role`,
         payload: { role: 'admin' },
@@ -130,7 +151,10 @@ describe('organization administration', () => {
 
     it('stops an admin from promoting themselves', async () => {
       const admin = await addMember(ctx, owner, 'admin');
-      const response = await authed(ctx, admin)({
+      const response = await authed(
+        ctx,
+        admin,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${admin.userId}/role`,
         payload: { role: 'owner' },
@@ -142,7 +166,10 @@ describe('organization administration', () => {
       const manager = await addMember(ctx, owner, 'manager');
       const member = await addMember(ctx, owner, 'member');
 
-      const response = await authed(ctx, manager)({
+      const response = await authed(
+        ctx,
+        manager,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${member.userId}/role`,
         payload: { role: 'admin' },
@@ -152,7 +179,10 @@ describe('organization administration', () => {
 
     it('lets an owner promote and demote below owner', async () => {
       const member = await addMember(ctx, owner, 'member');
-      const promoted = await authed(ctx, owner)({
+      const promoted = await authed(
+        ctx,
+        owner,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${member.userId}/role`,
         payload: { role: 'finance' },
@@ -162,7 +192,10 @@ describe('organization administration', () => {
     });
 
     it('keeps at least one owner', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${owner.userId}/role`,
         payload: { role: 'admin' },
@@ -173,7 +206,10 @@ describe('organization administration', () => {
 
     it('refuses to act on a member of another organization', async () => {
       const other = await registerOrganization(ctx);
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${other.userId}/role`,
         payload: { role: 'viewer' },
@@ -190,7 +226,10 @@ describe('organization administration', () => {
       const before = await authed(ctx, member)({ method: 'GET', url: '/api/v1/auth/me' });
       expect(before.statusCode).toBe(200);
 
-      const removed = await authed(ctx, owner)({
+      const removed = await authed(
+        ctx,
+        owner,
+      )({
         method: 'DELETE',
         url: `/api/v1/organization/members/${member.userId}`,
       });
@@ -211,7 +250,10 @@ describe('organization administration', () => {
     });
 
     it('refuses self-removal', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'DELETE',
         url: `/api/v1/organization/members/${owner.userId}`,
       });
@@ -220,7 +262,10 @@ describe('organization administration', () => {
 
     it('refuses to remove the last owner', async () => {
       const admin = await addMember(ctx, owner, 'admin');
-      const response = await authed(ctx, admin)({
+      const response = await authed(
+        ctx,
+        admin,
+      )({
         method: 'DELETE',
         url: `/api/v1/organization/members/${owner.userId}`,
       });
@@ -232,13 +277,19 @@ describe('organization administration', () => {
   describe('audit log', () => {
     it('records membership changes', async () => {
       const member = await addMember(ctx, owner, 'member');
-      await authed(ctx, owner)({
+      await authed(
+        ctx,
+        owner,
+      )({
         method: 'PATCH',
         url: `/api/v1/organization/members/${member.userId}/role`,
         payload: { role: 'viewer' },
       });
 
-      const audit = await authed(ctx, owner)({
+      const audit = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/organization/audit',
       });
@@ -249,7 +300,10 @@ describe('organization administration', () => {
 
     it('never exposes another organization’s audit rows', async () => {
       const other = await registerOrganization(ctx);
-      await authed(ctx, other)({
+      await authed(
+        ctx,
+        other,
+      )({
         method: 'POST',
         url: '/api/v1/clients',
         payload: { name: 'Their Client' },

@@ -73,7 +73,10 @@ describe('clients', () => {
 
     it('fetches one client by id', async () => {
       const created = (await create(owner, { name: 'Acme' })).json();
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: `/api/v1/clients/${created.id}`,
       });
@@ -82,7 +85,10 @@ describe('clients', () => {
     });
 
     it('404s on a well-formed id that does not exist', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: `/api/v1/clients/cli_${'0'.repeat(32)}`,
       });
@@ -90,7 +96,10 @@ describe('clients', () => {
     });
 
     it('422s on an id of the wrong resource kind', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: `/api/v1/clients/prj_${'0'.repeat(32)}`,
       });
@@ -115,7 +124,10 @@ describe('clients', () => {
       const other = await registerOrganization(ctx);
       const theirs = (await create(other, { name: 'Theirs' })).json();
 
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: `/api/v1/clients/${theirs.id}`,
       });
@@ -127,14 +139,20 @@ describe('clients', () => {
       const other = await registerOrganization(ctx);
       const theirs = (await create(other, { name: 'Theirs' })).json();
 
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'PATCH',
         url: `/api/v1/clients/${theirs.id}`,
         payload: { name: 'Hijacked' },
       });
       expect(response.statusCode).toBe(404);
 
-      const unchanged = await authed(ctx, other)({
+      const unchanged = await authed(
+        ctx,
+        other,
+      )({
         method: 'GET',
         url: `/api/v1/clients/${theirs.id}`,
       });
@@ -145,7 +163,10 @@ describe('clients', () => {
       const other = await registerOrganization(ctx);
       const theirs = (await create(other, { name: 'Theirs' })).json();
 
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'DELETE',
         url: `/api/v1/clients/${theirs.id}`,
       });
@@ -171,14 +192,20 @@ describe('clients', () => {
       const created = await create(manager, { name: 'Managed Co' });
       expect(created.statusCode).toBe(201);
 
-      const updated = await authed(ctx, manager)({
+      const updated = await authed(
+        ctx,
+        manager,
+      )({
         method: 'PATCH',
         url: `/api/v1/clients/${created.json().id}`,
         payload: { status: 'active' },
       });
       expect(updated.statusCode).toBe(200);
 
-      const deleted = await authed(ctx, manager)({
+      const deleted = await authed(
+        ctx,
+        manager,
+      )({
         method: 'DELETE',
         url: `/api/v1/clients/${created.json().id}`,
       });
@@ -199,7 +226,10 @@ describe('clients', () => {
     });
 
     it('filters by status', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/clients?status=active',
       });
@@ -208,7 +238,10 @@ describe('clients', () => {
     });
 
     it('searches by name', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/clients?q=beta',
       });
@@ -226,7 +259,10 @@ describe('clients', () => {
       expect(firstPage.items).toHaveLength(2);
       expect(firstPage.nextCursor).toBeTruthy();
 
-      const second = await authed(ctx, owner)({
+      const second = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: `/api/v1/clients?limit=2&cursor=${encodeURIComponent(firstPage.nextCursor)}`,
       });
@@ -239,7 +275,10 @@ describe('clients', () => {
     });
 
     it('rejects an over-large page size rather than silently clamping', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/clients?limit=5000',
       });
@@ -247,7 +286,10 @@ describe('clients', () => {
     });
 
     it('treats a corrupt cursor as the first page', async () => {
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/clients?cursor=not-a-real-cursor',
       });
@@ -260,13 +302,19 @@ describe('clients', () => {
     it('soft-deletes and hides the client afterwards', async () => {
       const client = (await create(owner, { name: 'Gone' })).json();
 
-      const deleted = await authed(ctx, owner)({
+      const deleted = await authed(
+        ctx,
+        owner,
+      )({
         method: 'DELETE',
         url: `/api/v1/clients/${client.id}`,
       });
       expect(deleted.statusCode).toBe(200);
 
-      const fetched = await authed(ctx, owner)({
+      const fetched = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: `/api/v1/clients/${client.id}`,
       });
@@ -303,7 +351,10 @@ describe('clients', () => {
       const other = await registerOrganization(ctx);
       const theirs = (await create(other, { name: 'Theirs' })).json();
 
-      const response = await authed(ctx, owner)({
+      const response = await authed(
+        ctx,
+        owner,
+      )({
         method: 'POST',
         url: `/api/v1/clients/${theirs.id}/contacts`,
         payload: { name: 'Intruder', isPrimary: false },
@@ -332,7 +383,10 @@ describe('clients', () => {
 
     it('records the actor and the request id', async () => {
       await create(owner, { name: 'Traced' });
-      const audit = await authed(ctx, owner)({
+      const audit = await authed(
+        ctx,
+        owner,
+      )({
         method: 'GET',
         url: '/api/v1/organization/audit?action=client.created',
       });
@@ -343,7 +397,10 @@ describe('clients', () => {
 
     it('is not readable by a manager', async () => {
       const manager = await addMember(ctx, owner, 'manager');
-      const response = await authed(ctx, manager)({
+      const response = await authed(
+        ctx,
+        manager,
+      )({
         method: 'GET',
         url: '/api/v1/organization/audit',
       });
