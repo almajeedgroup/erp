@@ -1,0 +1,51 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+dist/
+build/
+out/
+.next/
+*.tsbuildinfo
+
+# test / coverage
+coverage/
+.vitest/
+*.lcov
+
+# env & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+!**/testdata/*.key
+secrets/
+
+# local data
+var/
+storage/
+uploads/
+pgdata/
+*.sqlite
+*.db
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# editors / os
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# misc
+.turbo/
+.cache/
+tmp/

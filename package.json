@@ -1,0 +1,53 @@
+{
+  "name": "@almajeed/erp",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Al-Majeed ERP \u2014 clients, projects, employees, finance, documents, tasks, analytics and an AI agent in one system.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build:packages && npm run build:apps",
+    "build:packages": "npm run build -w @almajeed/shared && npm run build -w @almajeed/db",
+    "build:apps": "npm run build -w @almajeed/api && npm run build -w @almajeed/web",
+    "dev": "npm run build:packages && concurrently -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
+    "dev:api": "npm run dev -w @almajeed/api",
+    "dev:web": "npm run dev -w @almajeed/web",
+    "typecheck": "tsc -b --pretty",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:generate": "npm run generate -w @almajeed/db",
+    "db:migrate": "npm run migrate -w @almajeed/db",
+    "db:seed": "npm run seed -w @almajeed/db",
+    "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test",
+    "clean": "rm -rf node_modules */*/node_modules */*/dist apps/web/.next coverage *.tsbuildinfo"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^5.0.0",
+    "concurrently": "^9.2.1",
+    "eslint": "^10.10.0",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.9.6",
+    "tsx": "^4.23.13",
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.70.0",
+    "vitest": "^5.0.0"
+  },
+  "overrides": {
+    "esbuild": "^0.25.12"
+  }
+}
