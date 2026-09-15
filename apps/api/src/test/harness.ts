@@ -27,8 +27,9 @@ const TEST_ENV = {
   PASSWORD_PEPPER: 'test-password-pepper-long-enough-32char',
   AI_PROVIDER: 'mock',
   STORAGE_DRIVER: 'local',
-  // Limits are raised, not removed, so a test can still lower one deliberately
-  // (see security.test.ts) while the rest of the suite is not throttled.
+  // Limits are raised, not removed, so the rate limiter is still wired and a
+  // test can lower one deliberately through `createTestContext` overrides,
+  // the way auth.test.ts overrides JWT_SECRET, without throttling the suite.
   RATE_LIMIT_MAX: '100000',
   AUTH_RATE_LIMIT_MAX: '100000',
   REGISTER_RATE_LIMIT_MAX: '100000',

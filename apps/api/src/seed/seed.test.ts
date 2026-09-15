@@ -164,9 +164,22 @@ describe('demo data', () => {
       headers: managerHeaders,
     });
 
-    expect(asFinance.json().items[0].compensation).not.toBe(null);
-    expect(asManager.json().items[0].compensation).toBe(null);
-    expect(asManager.json().items[0].fullName).toBeTruthy();
+    // Pick the employee by name rather than by position: both seeded records
+    // are written in the same transaction, so they share `created_at` and the
+    // keyset tiebreaker (`id DESC`) leaves their order undefined between runs.
+    const sara = (body: { items: { fullName: string; compensation: unknown }[] }) =>
+      body.items.find((item) => item.fullName === 'Sara Ahmed');
+
+    const financeView = sara(asFinance.json());
+    const managerView = sara(asManager.json());
+
+    expect(financeView).toBeDefined();
+    expect(managerView).toBeDefined();
+    // The same person, seen by two roles: the sensitive block is present for
+    // one and null for the other, while the rest of the record is identical.
+    expect(financeView?.compensation).not.toBe(null);
+    expect(managerView?.compensation).toBe(null);
+    expect(managerView?.fullName).toBe('Sara Ahmed');
 
     // The auditor can read the books but cannot touch them.
     const auditorHeaders = await signIn('auditor@almajeed.test');
