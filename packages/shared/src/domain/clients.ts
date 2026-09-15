@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import {
+  currencySchema,
   emailSchema,
   id,
   isoDate,
@@ -12,7 +13,6 @@ import {
   tagsSchema,
   urlSchema,
 } from './common.js';
-import { currencySchema } from './common.js';
 
 /** Where a client sits in the commercial funnel. Drives the pipeline report. */
 export const CLIENT_STATUSES = ['lead', 'prospect', 'active', 'dormant', 'churned'] as const;
@@ -89,3 +89,51 @@ export type CreateClientInput = z.infer<typeof createClientSchema>;
 export type UpdateClientInput = z.infer<typeof updateClientSchema>;
 export type ListClientsQuery = z.infer<typeof listClientsQuerySchema>;
 export type CreateContactInput = z.infer<typeof createContactSchema>;
+
+/* ---------------------------------------------------------------- output -- */
+
+/**
+ * The client as the API returns it.
+ *
+ * Declared here, next to the input schemas, so the API validates its own
+ * responses against the same definition the web app imports for its types.
+ * A response that stops matching this is a serialization error in tests and in
+ * CI, not a surprise in the browser.
+ */
+export const clientSchema = z.object({
+  id: id('client'),
+  name: z.string(),
+  legalName: z.string().nullable(),
+  status: clientStatusSchema,
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  website: z.string().nullable(),
+  taxNumber: z.string().nullable(),
+  billingCurrency: z.string(),
+  paymentTermsDays: z.number().int(),
+  acquisitionChannel: acquisitionChannelSchema,
+  acquiredAt: z.string().nullable(),
+  address: addressSchema.nullable(),
+  notes: z.string().nullable(),
+  ownerId: z.string().nullable(),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export const contactSchema = z.object({
+  id: id('contact'),
+  clientId: id('client'),
+  name: z.string(),
+  title: z.string().nullable(),
+  email: z.string().nullable(),
+  phone: z.string().nullable(),
+  isPrimary: z.boolean(),
+  notes: z.string().nullable(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+});
+
+export type Client = z.infer<typeof clientSchema>;
+export type Contact = z.infer<typeof contactSchema>;
