@@ -20,7 +20,7 @@
     "dev": "npm run build:packages && concurrently -n api,web -c cyan,magenta \"npm:dev:api\" \"npm:dev:web\"",
     "dev:api": "npm run dev -w @almajeed/api",
     "dev:web": "npm run dev -w @almajeed/web",
-    "typecheck": "tsc -b --pretty",
+    "typecheck": "tsc -b --pretty && tsc -p tsconfig.typecheck.json --pretty",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
