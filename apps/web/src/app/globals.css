@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/**
+ * Design tokens.
+ *
+ * One neutral ramp plus a single accent, defined once here as CSS variables and
+ * consumed through Tailwind utilities. Dark mode flips the ramp rather than
+ * restating every colour, so a component written once reads correctly in both.
+ */
+@theme {
+  --color-surface: oklch(99% 0.002 250);
+  --color-surface-raised: oklch(100% 0 0);
+  --color-surface-sunken: oklch(96.5% 0.004 250);
+  --color-border-subtle: oklch(91% 0.006 250);
+  --color-ink: oklch(22% 0.015 255);
+  --color-ink-muted: oklch(50% 0.012 255);
+  --color-ink-faint: oklch(63% 0.01 255);
+
+  --color-accent: oklch(52% 0.13 200);
+  --color-accent-strong: oklch(44% 0.14 200);
+  --color-accent-soft: oklch(95% 0.03 200);
+
+  --color-positive: oklch(55% 0.13 155);
+  --color-positive-soft: oklch(95% 0.04 155);
+  --color-caution: oklch(68% 0.14 75);
+  --color-caution-soft: oklch(96% 0.05 85);
+  --color-negative: oklch(55% 0.18 25);
+  --color-negative-soft: oklch(95% 0.04 25);
+
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans Arabic', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-surface: oklch(17% 0.012 255);
+    --color-surface-raised: oklch(21% 0.014 255);
+    --color-surface-sunken: oklch(14% 0.01 255);
+    --color-border-subtle: oklch(29% 0.014 255);
+    --color-ink: oklch(94% 0.005 250);
+    --color-ink-muted: oklch(72% 0.01 250);
+    --color-ink-faint: oklch(58% 0.01 250);
+
+    --color-accent: oklch(70% 0.11 200);
+    --color-accent-strong: oklch(78% 0.11 200);
+    --color-accent-soft: oklch(28% 0.05 200);
+
+    --color-positive: oklch(72% 0.13 155);
+    --color-positive-soft: oklch(26% 0.05 155);
+    --color-caution: oklch(78% 0.13 80);
+    --color-caution-soft: oklch(28% 0.06 80);
+    --color-negative: oklch(68% 0.15 25);
+    --color-negative-soft: oklch(27% 0.06 25);
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* A visible focus ring on every interactive element, not just on hover. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* Tabular figures keep money columns aligned as values change. */
+.numeric {
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

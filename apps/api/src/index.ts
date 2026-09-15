@@ -1,4 +1,4 @@
-import { createDatabase, runMigrations } from '@almajeed/db';
+import { createDatabase, runMigrations, type Database } from '@almajeed/db';
 import { loadConfig } from './config/env.js';
 import { buildServer } from './server.js';
 
@@ -18,11 +18,27 @@ import { buildServer } from './server.js';
  */
 
 const config = loadConfig();
-const handle = createDatabase({
-  url: config.database.url,
-  poolMax: config.database.poolMax,
-  ssl: config.database.ssl,
-});
+
+/**
+ * Demo mode.
+ *
+ * `DATABASE_URL=memory://demo` boots against PGlite — real Postgres compiled to
+ * WebAssembly, running in this process — then migrates and seeds itself. It
+ * exists so someone can clone the repository and see the whole product working
+ * in one command, with no database to install and nothing to configure.
+ *
+ * The data is gone when the process exits, which is the point. The import is
+ * dynamic and guarded, so the production bundle never loads PGlite at all.
+ */
+const demoMode = config.database.url.startsWith('memory:');
+
+const handle = demoMode
+  ? await createDemoDatabase()
+  : createDatabase({
+      url: config.database.url,
+      poolMax: config.database.poolMax,
+      ssl: config.database.ssl,
+    });
 
 const app = await buildServer({ config, db: handle.db });
 
@@ -30,9 +46,19 @@ const app = await buildServer({ config, db: handle.db });
 // advisory lock, so replicas starting together serialise rather than racing.
 // At larger scale this moves to a release job that runs before any new
 // container takes traffic — see docs/04-infrastructure/ci-cd.md.
-if (process.env.RUN_MIGRATIONS_ON_BOOT === 'true') {
+if (!demoMode && process.env.RUN_MIGRATIONS_ON_BOOT === 'true') {
   app.log.info('applying migrations');
   await runMigrations(handle.db);
+}
+
+if (demoMode) {
+  const { seedDemoData } = await import('./seed/demo-data.js');
+  await seedDemoData({
+    db: handle.db,
+    services: app.services,
+    log: (message) => app.log.info(message.trim()),
+  });
+  app.log.warn('running in demo mode: in-memory database, data is lost on exit');
 }
 
 try {
@@ -89,3 +115,11 @@ process.on('uncaughtException', (error) => {
   app.log.fatal({ err: error }, 'uncaught exception');
   process.exit(1);
 });
+
+
+/** In-process Postgres for demo mode. Never reached in production. */
+async function createDemoDatabase(): Promise<{ db: Database; close: () => Promise<void> }> {
+  const { createTestDatabase } = await import('@almajeed/db/testing');
+  const instance = await createTestDatabase();
+  return { db: instance.db, close: instance.close };
+}

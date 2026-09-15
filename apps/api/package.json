@@ -10,7 +10,8 @@
     "clean": "rm -rf dist *.tsbuildinfo",
     "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
     "start": "node dist/index.js",
-    "seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts"
+    "seed": "tsx --env-file-if-exists=../../.env src/scripts/seed.ts",
+    "dev:demo": "tsx watch --env-file=../../.env.demo src/index.ts"
   },
   "dependencies": {
     "@almajeed/db": "*",

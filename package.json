@@ -32,7 +32,10 @@
     "db:migrate": "npm run migrate -w @almajeed/db",
     "db:seed": "npm run seed -w @almajeed/api",
     "verify": "npm run format:check && npm run lint && npm run typecheck && npm run test",
-    "clean": "rm -rf node_modules */*/node_modules */*/dist apps/web/.next coverage *.tsbuildinfo"
+    "clean": "rm -rf node_modules */*/node_modules */*/dist apps/web/.next coverage *.tsbuildinfo",
+    "demo": "npm run build:packages && concurrently -n api,web -c cyan,magenta \"npm:demo:api\" \"npm:demo:web\"",
+    "demo:api": "npm run dev:demo -w @almajeed/api",
+    "demo:web": "npm run dev -w @almajeed/web"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
