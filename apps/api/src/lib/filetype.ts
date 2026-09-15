@@ -8,8 +8,13 @@
  *
  * So the server sniffs the leading bytes, and the *sniffed* type is what gets
  * stored, checked against the allow-list and echoed back on download. The
- * declared type is used only to break ties for formats that genuinely have no
- * signature (plain text, CSV, Markdown). See docs/08-modules/documents.md.
+ * declared type is consulted in exactly two places: to break ties between
+ * container formats that share a signature, and to name formats that genuinely
+ * have none (plain text, CSV, Markdown, JSON).
+ *
+ * Anything unidentified resolves to `application/octet-stream`, which is not on
+ * the upload allow-list — so "I could not tell what this is" is a rejection,
+ * never a guess. See docs/08-modules/documents.md.
  */
 
 export interface DetectedType {
@@ -43,6 +48,29 @@ const SIGNATURES: Signature[] = [
 
 /** Types that carry no signature and are therefore trusted from the declaration. */
 const SIGNATURELESS = new Set(['text/plain', 'text/csv', 'text/markdown', 'application/json']);
+
+/**
+ * Declared types that MUST be backed by a matching signature.
+ *
+ * If a caller says `application/pdf` and the bytes are not a PDF, that is not a
+ * mislabelled text file to be helpfully reclassified — it is a lie, and the
+ * upload is refused. Falling back to `text/plain` here would quietly accept an
+ * HTML payload named `invoice.pdf`.
+ */
+const SIGNATURE_REQUIRED = new Set([
+  'application/pdf',
+  'image/png',
+  'image/jpeg',
+  'image/gif',
+  'image/webp',
+  'application/zip',
+  'application/msword',
+  'application/vnd.ms-excel',
+  'application/vnd.ms-powerpoint',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+]);
 
 /** OOXML container types, distinguished by a marker inside the zip payload. */
 const OOXML_MARKERS: { marker: string; contentType: string }[] = [
@@ -100,14 +128,18 @@ export function detectContentType(buffer: Buffer, declared: string | undefined):
     return { contentType: signature.contentType, fromSignature: true };
   }
 
+  // No signature matched, so a type that should have carried one was misdeclared.
+  if (SIGNATURE_REQUIRED.has(claimed)) {
+    return { contentType: 'application/octet-stream', fromSignature: false };
+  }
+
   if (SIGNATURELESS.has(claimed) && isProbablyText(buffer)) {
     return { contentType: claimed, fromSignature: false };
   }
 
-  if (isProbablyText(buffer)) {
-    return { contentType: 'text/plain', fromSignature: false };
-  }
-
+  // Anything else is unidentified. `application/octet-stream` is not on the
+  // upload allow-list, so "I could not tell what this is" becomes a rejection
+  // rather than a guess.
   return { contentType: 'application/octet-stream', fromSignature: false };
 }
 

@@ -90,7 +90,15 @@ export async function createTestContext(
 
   return {
     app,
-    database,
+    // `truncate` clears stored objects too, so a test asserting on what is in
+    // the object store sees only its own uploads.
+    database: {
+      ...database,
+      truncate: async () => {
+        await database.truncate();
+        storage.contents.clear();
+      },
+    },
     storage,
     config,
     ai,

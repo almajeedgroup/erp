@@ -2,7 +2,6 @@ import { z } from 'zod';
 import {
   id,
   isoDate,
-  isoDateTime,
   longText,
   mediumText,
   metadataSchema,
@@ -73,16 +72,45 @@ export const createCommentSchema = z.strictObject({
   body: mediumText,
 });
 
+/* ---------------------------------------------------------------- output -- */
+
 export const taskSchema = z.object({
   id: id('task'),
   title: z.string(),
+  description: z.string().nullable(),
   status: taskStatusSchema,
   priority: taskPrioritySchema,
   dueDate: z.string().nullable(),
-  assigneeId: z.string().nullable(),
+  /** Derived at read time: past due and not in a terminal status. */
+  overdue: z.boolean(),
+  estimateMinutes: z.number().int().nullable(),
+  /** Sum of approved and unapproved time logged against this task. */
+  loggedMinutes: z.number().int(),
   projectId: z.string().nullable(),
-  createdAt: isoDateTime,
+  projectName: z.string().nullable(),
+  clientId: z.string().nullable(),
+  assigneeId: z.string().nullable(),
+  assigneeName: z.string().nullable(),
+  parentTaskId: z.string().nullable(),
+  position: z.number().int(),
+  completedAt: z.string().nullable(),
+  tags: z.array(z.string()),
+  metadata: z.record(z.string(), z.unknown()),
+  createdAt: z.string(),
+  updatedAt: z.string(),
 });
+
+export const taskCommentSchema = z.object({
+  id: id('comment'),
+  taskId: id('task'),
+  authorUserId: z.string().nullable(),
+  authorName: z.string().nullable(),
+  body: z.string(),
+  createdAt: z.string(),
+});
+
+export type Task = z.infer<typeof taskSchema>;
+export type TaskComment = z.infer<typeof taskCommentSchema>;
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;

@@ -1,10 +1,14 @@
 import type { FastifyPluginAsyncZod } from 'fastify-type-provider-zod';
+import { aiRoutes } from './modules/ai/routes.js';
+import { analyticsRoutes } from './modules/analytics/routes.js';
 import { authRoutes } from './modules/auth/routes.js';
 import { clientRoutes } from './modules/clients/routes.js';
 import { organizationRoutes } from './modules/organizations/routes.js';
+import { documentRoutes } from './modules/documents/routes.js';
 import { employeeRoutes } from './modules/employees/routes.js';
 import { expenseRoutes, invoiceRoutes } from './modules/finance/routes.js';
 import { projectRoutes, timeEntryRoutes } from './modules/projects/routes.js';
+import { taskRoutes } from './modules/tasks/routes.js';
 
 /**
  * The route table.
@@ -22,4 +26,8 @@ export const registerRoutes: FastifyPluginAsyncZod = async (app) => {
   await app.register(employeeRoutes, { prefix: '/employees' });
   await app.register(invoiceRoutes, { prefix: '/invoices' });
   await app.register(expenseRoutes, { prefix: '/expenses' });
+  await app.register(documentRoutes, { prefix: '/documents' });
+  await app.register(taskRoutes, { prefix: '/tasks' });
+  await app.register(analyticsRoutes, { prefix: '/analytics' });
+  await app.register(aiRoutes, { prefix: '/ai' });
 };
